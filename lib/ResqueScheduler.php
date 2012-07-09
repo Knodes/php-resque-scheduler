@@ -160,7 +160,7 @@ class ResqueScheduler
 	 *                                Defaults to now.
 	 * @return int|false UNIX timestamp, or false if nothing to run.
 	 */
-	public function nextDelayedTimestamp($at = null)
+	public static function nextDelayedTimestamp($at = null)
 	{
 		if ($at === null) {
 			$at = time();
@@ -168,8 +168,9 @@ class ResqueScheduler
 		else {
 			$at = self::getTimestamp($at);
 		}
-	
-		$items = Resque::redis()->zrangebyscore('delayed_queue_schedule', '-inf', $at, 'LIMIT', 0, 1);
+
+        //$redis->zRangeByScore('key', 0, 3, array('withscores' => TRUE, 'limit' => array(1, 1)); /* array('val2' => 2) */    
+		$items = Resque::redis()->zRangeByScore('delayed_queue_schedule', '-inf', $at, array('limit' => array(0, 1)));
 		if (!empty($items)) {
 			return $items[0];
 		}
@@ -183,7 +184,7 @@ class ResqueScheduler
 	 * @param DateTime|int $timestamp Instance of DateTime or UNIX timestamp.
 	 * @return array Matching job at timestamp.
 	 */
-	public function nextItemForTimestamp($timestamp)
+	public static function nextItemForTimestamp($timestamp)
 	{
 		$timestamp = self::getTimestamp($timestamp);
 		$key = 'delayed:' . $timestamp;
