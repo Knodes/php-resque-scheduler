@@ -168,9 +168,10 @@ class ResqueScheduler
 		else {
 			$at = self::getTimestamp($at);
 		}
-
+		
+		$items = Resque::redis()->zrangebyscore('delayed_queue_schedule', '-inf', $at, 'LIMIT', 0, 1);
         //$redis->zRangeByScore('key', 0, 3, array('withscores' => TRUE, 'limit' => array(1, 1)); /* array('val2' => 2) */    
-		$items = Resque::redis()->zRangeByScore('delayed_queue_schedule', '-inf', $at, array('limit' => array(0, 1)));
+		//$items = Resque::redis()->zRangeByScore('delayed_queue_schedule', '-inf', $at, array('limit' => array(0, 1)));
 		if (!empty($items)) {
 			return $items[0];
 		}
